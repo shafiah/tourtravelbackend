@@ -1,6 +1,11 @@
 package com.tourtravel.controller;
 
 import com.tourtravel.dto.request.SignupRequest;
+
+import com.tourtravel.dto.request.SendOtpRequest;
+import com.tourtravel.dto.request.VerifyOtpRequest;
+import com.tourtravel.service.OtpService;
+
 import com.tourtravel.dto.request.LoginRequest;
 import com.tourtravel.dto.request.ForgotPasswordRequest;
 import com.tourtravel.dto.request.ResetPasswordRequest;
@@ -20,9 +25,12 @@ import org.springframework.web.bind.annotation.*;
 public class AuthController {
 
     private final UserService userService;
+    private final OtpService otpService;
 
-    public AuthController(UserService userService) {
+
+    public AuthController(UserService userService, OtpService otpService) {
         this.userService = userService;
+        this.otpService = otpService;
     }
 
     /**
@@ -120,4 +128,61 @@ public class AuthController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
         }
     }
+    
+    /**
+     * Send OTP to the specified email address.
+     *
+     * @param request the SendOtpRequest containing email
+     * @return ResponseEntity with ApiResponse and HTTP 200 OK status
+     */
+    @PostMapping("/send-otp")
+    public ResponseEntity<ApiResponse> sendOtp(@Valid @RequestBody SendOtpRequest request) {
+        log.info("Send OTP request received for email: {}", request.getEmail());
+
+        try {
+            otpService.sendOtp(request.getEmail());
+            log.info("OTP sent successfully to email: {}", request.getEmail());
+            ApiResponse response = ApiResponse.builder()
+                    .success(true)
+                    .message("OTP sent successfully")
+                    .build();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (RuntimeException e) {
+            log.error("Failed to send OTP: {}", e.getMessage());
+            ApiResponse errorResponse = ApiResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
+    /**
+     * Verify OTP for the specified email.
+     *
+     * @param request the VerifyOtpRequest containing email and OTP
+     * @return ResponseEntity with ApiResponse and HTTP 200 OK status
+     */
+    @PostMapping("/verify-otp")
+    public ResponseEntity<ApiResponse> verifyOtp(@Valid @RequestBody VerifyOtpRequest request) {
+        log.info("Verify OTP request received for email: {}", request.getEmail());
+
+        try {
+            otpService.verifyOtp(request.getEmail(), request.getOtp());
+            log.info("OTP verified successfully for email: {}", request.getEmail());
+            ApiResponse response = ApiResponse.builder()
+                    .success(true)
+                    .message("OTP verified successfully")
+                    .build();
+            return ResponseEntity.status(HttpStatus.OK).body(response);
+        } catch (RuntimeException e) {
+            log.error("OTP verification failed: {}", e.getMessage());
+            ApiResponse errorResponse = ApiResponse.builder()
+                    .success(false)
+                    .message(e.getMessage())
+                    .build();
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+        }
+    }
+
 }

@@ -42,6 +42,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**").permitAll()
                         // Allow public access to H2 console
                         .requestMatchers("/h2-console/**").permitAll()
+                        .requestMatchers("/api/test/**").permitAll()
                         // All other requests require authentication
                         .anyRequest().authenticated()
                 )
