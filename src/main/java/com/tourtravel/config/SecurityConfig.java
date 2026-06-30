@@ -60,17 +60,25 @@ public class SecurityConfig {
 
                 // Configure authorization rules
                 .authorizeHttpRequests(authz -> authz
-                        // Allow public access to authentication endpoints
+
+                        // Public APIs
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/bookings/**").permitAll()
                         .requestMatchers("/api/contact/**").permitAll()
-                        // Allow public access to H2 console
                         .requestMatchers("/h2-console/**").permitAll()
-                        //.requestMatchers("/api/test/**").permitAll()
-                        // All other requests require authentication
+
+                        // Protected Test API
+                        .requestMatchers("/api/test/**").authenticated()
+
+                        // User APIs
+                        .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
+
+                        // Admin APIs
+                        .requestMatchers("/api/admin/**").hasRole("ADMIN")
+
+                        // Everything else
                         .anyRequest().authenticated()
                 )
-
                 // Disable frame options to allow H2 console (iframe)
                 .headers(headers -> headers
                         .frameOptions(frameOptions -> frameOptions.disable())

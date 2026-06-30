@@ -7,6 +7,14 @@ import com.tourtravel.repository.BookingRepository;
 import com.tourtravel.service.BookingService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import com.tourtravel.enums.BookingStatus;
+
+import com.tourtravel.dto.request.UpdateBookingStatusRequest;
+import com.tourtravel.dto.response.AdminBookingResponse;
+import com.tourtravel.dto.response.ApiResponse;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * Implementation of BookingService.
@@ -44,7 +52,7 @@ public class BookingServiceImpl implements BookingService {
                 .adults(request.getAdults())
                 .children(request.getChildren())
                 .infants(request.getInfants())
-                .bookingStatus("PENDING")
+                .bookingStatus(BookingStatus.PENDING)
                 .build();
 
         // Save into database
@@ -66,6 +74,92 @@ public class BookingServiceImpl implements BookingService {
                 .infants(savedBooking.getInfants())
                 .bookingStatus(savedBooking.getBookingStatus())
                 .createdAt(savedBooking.getCreatedAt())
+                .build();
+    }
+    @Override
+    public List<AdminBookingResponse> getAllBookings() {
+
+        log.info("Fetching all bookings");
+
+        return bookingRepository.findAll()
+                .stream()
+                .map(booking -> AdminBookingResponse.builder()
+                        .id(booking.getId())
+                        .destination(booking.getDestination())
+                        .departureDate(booking.getDepartureDate())
+                        .departureCity(booking.getDepartureCity())
+                        .fullName(booking.getFullName())
+                        .phoneNumber(booking.getPhoneNumber())
+                        .email(booking.getEmail())
+                        .adults(booking.getAdults())
+                        .children(booking.getChildren())
+                        .infants(booking.getInfants())
+                        .bookingStatus(booking.getBookingStatus())
+                        .createdAt(booking.getCreatedAt())
+                        .build())
+                .collect(Collectors.toList());
+    }
+    @Override
+    public AdminBookingResponse getBookingById(Long id) {
+
+        log.info("Fetching booking with ID: {}", id);
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Booking not found with ID: " + id));
+
+        return AdminBookingResponse.builder()
+                .id(booking.getId())
+                .destination(booking.getDestination())
+                .departureDate(booking.getDepartureDate())
+                .departureCity(booking.getDepartureCity())
+                .fullName(booking.getFullName())
+                .phoneNumber(booking.getPhoneNumber())
+                .email(booking.getEmail())
+                .adults(booking.getAdults())
+                .children(booking.getChildren())
+                .infants(booking.getInfants())
+                .bookingStatus(booking.getBookingStatus())
+                .createdAt(booking.getCreatedAt())
+                .build();
+    }
+
+    @Override
+    public ApiResponse updateBookingStatus(Long id, UpdateBookingStatusRequest request) {
+
+        log.info("Updating booking status for ID: {}", id);
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Booking not found with ID: " + id));
+
+        booking.setBookingStatus(request.getBookingStatus());
+
+        bookingRepository.save(booking);
+
+        log.info("Booking status updated successfully for ID: {}", id);
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Booking status updated successfully")
+                .build();
+    }
+
+    @Override
+    public ApiResponse deleteBooking(Long id) {
+
+        log.info("Deleting booking with ID: {}", id);
+
+        Booking booking = bookingRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Booking not found with ID: " + id));
+
+        bookingRepository.delete(booking);
+
+        log.info("Booking deleted successfully with ID: {}", id);
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Booking deleted successfully")
                 .build();
     }
 }

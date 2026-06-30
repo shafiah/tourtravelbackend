@@ -1,21 +1,21 @@
 package com.tourtravel.dto.response;
 
+import com.tourtravel.enums.BookingStatus;
 import lombok.*;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-import com.tourtravel.enums.BookingStatus;
-
 /**
- * Response DTO for Booking API.
+ * DTO for Admin Booking Response.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class BookingResponse {
+@ToString
+public class AdminBookingResponse {
 
     private Long id;
 
@@ -40,4 +40,5 @@ public class BookingResponse {
     private BookingStatus bookingStatus;
 
     private LocalDateTime createdAt;
+
 }

@@ -3,6 +3,7 @@ package com.tourtravel.entity;
 import jakarta.persistence.*;
 import lombok.*;
 import java.time.LocalDateTime;
+import com.tourtravel.enums.Role;
 
 @Entity
 @Table(name = "users", uniqueConstraints = {
@@ -36,8 +37,9 @@ public class User {
     @Column(name = "password", nullable = false, length = 255)
     private String password;
 
+    @Enumerated(EnumType.STRING)
     @Column(name = "role", nullable = false, length = 20)
-    private String role;
+    private Role role;
 
     @Column(name = "enabled", nullable = false, columnDefinition = "BOOLEAN DEFAULT true")
     private Boolean enabled;
@@ -50,10 +52,16 @@ public class User {
 
     @PrePersist
     protected void onCreate() {
+
         this.createdAt = LocalDateTime.now();
         this.updatedAt = LocalDateTime.now();
+
         if (this.enabled == null) {
             this.enabled = true;
+        }
+
+        if (this.role == null) {
+            this.role = Role.USER;
         }
     }
 

@@ -14,6 +14,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import com.tourtravel.entity.User;
+import com.tourtravel.repository.UserRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
+import java.util.List;
+
 /**
  * JWT Authentication Filter that validates JWT tokens on every request.
  * Validates JWT token from Authorization header and sets Spring Security context.
@@ -26,9 +31,12 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private static final String BEARER_PREFIX = "Bearer ";
 
     private final JwtService jwtService;
+    private final UserRepository userRepository;
 
-    public JwtAuthenticationFilter(JwtService jwtService) {
+    public JwtAuthenticationFilter(JwtService jwtService,
+                                   UserRepository userRepository) {
         this.jwtService = jwtService;
+        this.userRepository = userRepository;
     }
 
     /**
@@ -57,13 +65,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 log.debug("JWT token validated for email: {}", email);
 
                 // Create authentication token
-                UsernamePasswordAuthenticationToken authenticationToken = 
-                        new UsernamePasswordAuthenticationToken(
-                                email, 
-                                null, 
-                                new ArrayList<>()
-                        );
+                User user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new RuntimeException("User not found"));
 
+                UsernamePasswordAuthenticationToken authenticationToken =
+                        new UsernamePasswordAuthenticationToken(
+                                email,
+                                null,
+                                List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                        );
                 // Set authentication in Spring Security context
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 log.debug("Authentication set in SecurityContext for email: {}", email);
