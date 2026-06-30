@@ -1,6 +1,9 @@
 package com.tourtravel.service.impl;
 
 import com.tourtravel.dto.request.SignupRequest;
+
+import com.tourtravel.service.JwtService;
+
 import com.tourtravel.dto.request.LoginRequest;
 import com.tourtravel.dto.request.ForgotPasswordRequest;
 import com.tourtravel.dto.request.ResetPasswordRequest;
@@ -19,12 +22,15 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class UserServiceImpl implements UserService {
 
-    private final UserRepository userRepository;
+	private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwtService jwtService;
 
-    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+
+    public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtService jwtService) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwtService = jwtService;
     }
 
     @Override
@@ -84,10 +90,14 @@ public class UserServiceImpl implements UserService {
 
         log.info("User login successful for email: {}", request.getEmail());
 
-        // Return user details in response
+        // Generate JWT token
+        String token = jwtService.generateToken(user.getEmail());
+
+        // Return user details with JWT token in response
         return LoginResponse.builder()
                 .success(true)
                 .message("Login successful")
+                .token(token)
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())

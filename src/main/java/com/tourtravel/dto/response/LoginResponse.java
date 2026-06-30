@@ -12,6 +12,7 @@ public class LoginResponse {
 
     private boolean success;
     private String message;
+    private String token;
     private String firstName;
     private String lastName;
     private String email;
