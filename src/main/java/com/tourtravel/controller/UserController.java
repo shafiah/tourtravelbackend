@@ -7,6 +7,14 @@ import org.springframework.web.bind.annotation.*;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.tourtravel.dto.request.ChangePasswordRequest;
+import com.tourtravel.dto.request.UpdateProfileRequest;
+import com.tourtravel.dto.response.ApiResponse;
+import com.tourtravel.dto.response.ProfileResponse;
+import com.tourtravel.service.UserService;
+
+import jakarta.validation.Valid;
+
 /**
  * REST Controller for User APIs.
  * Accessible by USER and ADMIN.
@@ -14,22 +22,45 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/user")
 public class UserController {
+	
+	private final UserService userService;
 
-    /**
-     * Protected User Profile API.
-     *
-     * @param authentication Spring Security Authentication
-     * @return Success response
-     */
-    @GetMapping("/profile")
-    public ResponseEntity<Map<String, Object>> profile(Authentication authentication) {
+	public UserController(UserService userService) {
+	    this.userService = userService;
+	}
 
-        Map<String, Object> response = new LinkedHashMap<>();
+	/**
+	 * Get logged-in user's profile.
+	 */
+	@GetMapping("/profile")
+	public ResponseEntity<ProfileResponse> getProfile(
+	        Authentication authentication) {
 
-        response.put("success", true);
-        response.put("message", "Welcome User");
-        response.put("email", authentication.getName());
+	    return ResponseEntity.ok(
+	            userService.getProfile(authentication.getName()));
+	}
 
-        return ResponseEntity.ok(response);
-    }
+	/**
+	 * Update logged-in user's profile.
+	 */
+	@PutMapping("/profile")
+	public ResponseEntity<ApiResponse> updateProfile(
+	        Authentication authentication,
+	        @Valid @RequestBody UpdateProfileRequest request) {
+
+	    return ResponseEntity.ok(
+	            userService.updateProfile(authentication.getName(), request));
+	}
+
+	/**
+	 * Change logged-in user's password.
+	 */
+	@PutMapping("/change-password")
+	public ResponseEntity<ApiResponse> changePassword(
+	        Authentication authentication,
+	        @Valid @RequestBody ChangePasswordRequest request) {
+
+	    return ResponseEntity.ok(
+	            userService.changePassword(authentication.getName(), request));
+	}
 }

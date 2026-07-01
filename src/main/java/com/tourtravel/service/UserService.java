@@ -6,6 +6,9 @@ import com.tourtravel.dto.request.LoginRequest;
 import com.tourtravel.dto.request.ForgotPasswordRequest;
 import com.tourtravel.dto.request.ResetPasswordRequest;
 import com.tourtravel.dto.response.LoginResponse;
+import com.tourtravel.dto.request.UpdateProfileRequest;
+import com.tourtravel.dto.request.ChangePasswordRequest;
+import com.tourtravel.dto.response.ProfileResponse;
 
 public interface UserService {
 
@@ -43,4 +46,30 @@ public interface UserService {
      * @throws RuntimeException if user not found
      */
     ApiResponse resetPassword(ResetPasswordRequest request);
+    
+    /**
+     * Get logged-in user's profile.
+     *
+     * @param email logged-in user's email
+     * @return profile details
+     */
+    ProfileResponse getProfile(String email);
+
+    /**
+     * Update logged-in user's profile.
+     *
+     * @param email logged-in user's email
+     * @param request profile update request
+     * @return success response
+     */
+    ApiResponse updateProfile(String email, UpdateProfileRequest request);
+
+    /**
+     * Change logged-in user's password.
+     *
+     * @param email logged-in user's email
+     * @param request password change request
+     * @return success response
+     */
+    ApiResponse changePassword(String email, ChangePasswordRequest request);
 }

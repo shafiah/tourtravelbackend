@@ -17,6 +17,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.tourtravel.enums.Role;
+import com.tourtravel.dto.response.ProfileResponse;
+import com.tourtravel.dto.request.UpdateProfileRequest;
+import com.tourtravel.dto.request.ChangePasswordRequest;
 
 @Slf4j
 @Service
@@ -148,6 +151,85 @@ public class UserServiceImpl implements UserService {
         return ApiResponse.builder()
                 .success(true)
                 .message("Password reset successfully")
+                .build();
+    }
+    
+    @Override
+    public ProfileResponse getProfile(String email) {
+
+        log.info("Fetching profile for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        return ProfileResponse.builder()
+                .id(user.getId())
+                .firstName(user.getFirstName())
+                .lastName(user.getLastName())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .role(user.getRole())
+                .build();
+    }
+    
+    @Override
+    public ApiResponse updateProfile(String email, UpdateProfileRequest request) {
+
+        log.info("Updating profile for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
+        user.setPhoneNumber(request.getPhoneNumber());
+
+        userRepository.save(user);
+
+        log.info("Profile updated successfully for email: {}", email);
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Profile updated successfully")
+                .build();
+    }
+    
+    @Override
+    public ApiResponse changePassword(String email, ChangePasswordRequest request) {
+
+        log.info("Changing password for email: {}", email);
+
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() ->
+                        new RuntimeException("User not found"));
+
+        // Verify current password
+        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
+            throw new RuntimeException("Current password is incorrect");
+        }
+
+        // Check new password and confirm password
+        if (!request.getNewPassword().equals(request.getConfirmPassword())) {
+            throw new RuntimeException("New password and confirm password do not match");
+        }
+
+        // Prevent using the same password again
+        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+            throw new RuntimeException("New password must be different from current password");
+        }
+
+        // Encode and save new password
+        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+
+        userRepository.save(user);
+
+        log.info("Password changed successfully for email: {}", email);
+
+        return ApiResponse.builder()
+                .success(true)
+                .message("Password changed successfully")
                 .build();
     }
 }

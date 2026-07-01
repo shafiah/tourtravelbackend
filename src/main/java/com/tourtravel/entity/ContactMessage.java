@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import com.tourtravel.enums.ContactStatus;
 
 /**
  * Entity representing Contact Us enquiries submitted by users.
@@ -56,8 +57,9 @@ public class ContactMessage {
      * Enquiry Status
      * Default: NEW
      */
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private String status;
+    private ContactStatus status;
 
     /**
      * Record Creation Time
@@ -77,7 +79,7 @@ public class ContactMessage {
         this.updatedAt = LocalDateTime.now();
 
         if (this.status == null) {
-            this.status = "NEW";
+            this.status = ContactStatus.NEW;
         }
     }
 

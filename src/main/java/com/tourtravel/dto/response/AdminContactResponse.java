@@ -1,20 +1,20 @@
 package com.tourtravel.dto.response;
 
+import com.tourtravel.enums.ContactStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
 
-import com.tourtravel.enums.ContactStatus;
-
 /**
- * Response DTO for Contact Us API.
+ * DTO for Admin Contact Response.
  */
 @Getter
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ContactResponse {
+@ToString
+public class AdminContactResponse {
 
     private Long id;
 
@@ -31,4 +31,5 @@ public class ContactResponse {
     private ContactStatus status;
 
     private LocalDateTime createdAt;
+
 }

@@ -16,6 +16,8 @@ import com.tourtravel.dto.response.ApiResponse;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.tourtravel.service.EmailService;
+
 /**
  * Implementation of BookingService.
  * Handles booking creation and database operations.
@@ -24,11 +26,14 @@ import java.util.stream.Collectors;
 @Service
 public class BookingServiceImpl implements BookingService {
 
-    private final BookingRepository bookingRepository;
+	private final BookingRepository bookingRepository;
+	private final EmailService emailService;
 
-    public BookingServiceImpl(BookingRepository bookingRepository) {
-        this.bookingRepository = bookingRepository;
-    }
+	public BookingServiceImpl(BookingRepository bookingRepository,
+	                          EmailService emailService) {
+	    this.bookingRepository = bookingRepository;
+	    this.emailService = emailService;
+	}
 
     /**
      * Creates a new booking and saves it into database.
@@ -59,6 +64,18 @@ public class BookingServiceImpl implements BookingService {
         Booking savedBooking = bookingRepository.save(booking);
 
         log.info("Booking created successfully with ID: {}", savedBooking.getId());
+        
+     // Send booking confirmation email to customer
+        emailService.sendBookingConfirmationToCustomer(
+                savedBooking.getEmail(),
+                savedBooking.getFullName(),
+                savedBooking.getDestination());
+
+        // Notify admin about new booking
+        emailService.sendBookingNotificationToAdmin(
+                savedBooking.getFullName(),
+                savedBooking.getEmail(),
+                savedBooking.getDestination());
 
         // Convert Entity -> Response DTO
         return BookingResponse.builder()

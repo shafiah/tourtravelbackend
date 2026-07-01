@@ -10,5 +10,13 @@ import org.springframework.stereotype.Repository;
  */
 @Repository
 public interface ContactRepository extends JpaRepository<ContactMessage, Long> {
-
+	
+	
+	/**
+	 * Count contacts by status.
+	 *
+	 * @param status contact status
+	 * @return total contacts
+	 */
+	Long countByStatus(com.tourtravel.enums.ContactStatus status);
 }
